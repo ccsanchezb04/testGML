@@ -18,6 +18,9 @@ Route::get('/','App\Http\Controllers\UserController@loadView');
 Route::group(['prefix' => 'users'], function () {
     Route::get('/','App\Http\Controllers\UserController@loadView');
     Route::get('all','App\Http\Controllers\UserController@getAllUsers');
+    Route::post('save','App\Http\Controllers\UserController@saveUser');
+    Route::get('validateUser','App\Http\Controllers\UserController@validateUser');
+    Route::get('getUserById','App\Http\Controllers\UserController@getUserById');
 });
 
 Route::group(['prefix' => 'categories'], function () {

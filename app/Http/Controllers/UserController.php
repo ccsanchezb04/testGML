@@ -24,8 +24,8 @@ class UserController extends Controller
                 'gml_user.email',
                 'gml_category.name as category_user'
             )
-            ->join('gml_category', 'gml_category.id', '=', 'gml_user.category_id')
-            ->get();           
+                ->join('gml_category', 'gml_category.id', '=', 'gml_user.category_id')
+                ->get();
 
             $response = ["status" => true, "data" => $users];
         } catch (\Exception $e) {
@@ -39,9 +39,62 @@ class UserController extends Controller
     public function saveUser(Request $request)
     {
         try {
-            //code...
+            // dd($request->user['name']);
+            $dataSaved = [
+                "name"         => $request->user['name'],
+                "last_name"    => $request->user['last_name'],
+                "id_number"    => trim($request->user['id_number']),
+                "phone_number" => $request->user['phone_number'],
+                "email"        => $request->user['email'],
+                "address"      => $request->user['address'],
+                "country"      => $request->user['country'],
+                "category_id"  => $request->user['category_id'],
+            ];
+
+            if (empty($request->user['id'])) {
+                User::create($dataSaved);
+            } else {
+                User::find($request->user['id'])->update($dataSaved);
+            }
+
+            $response = ["status" => true, "msm" => "Registro guardado con éxito"];
         } catch (\Exception $e) {
-            //throw $th;
+            $response = ["status" => false, "msm" => $e->getMessage()];
+            dd($e);
         }
+
+        return response()->json($response);
+    }
+
+    public function validateUser(Request $request)
+    {
+        try {
+            if ($request->field == "idNumber") {      
+                $user = User::where('id_number','=', trim($request->dataSend))->count();
+            } else if ($request->field == "email") {
+                $user = User::where('email', '=', trim($request->dataSend))->count();
+            }
+            // dd($user);
+
+            $response = ["status" => true, "count" => $user];
+        } catch (\Exception $e) {
+            $response = ["status" => false, "msm" => $e->getMessage()];
+            dd($e);
+        }
+
+        return response()->json($response);
+    }
+
+    public function getUserById(Request $request)
+    {
+        try {
+            $user = User::find($request->idUser);
+
+            $response = ["status" => true, "data" => $user];
+        } catch (\Exception $e) {
+            $response = ["status" => false, "msm" => $e->getMessage()];
+        }
+
+        return response()->json($response);
     }
 }
