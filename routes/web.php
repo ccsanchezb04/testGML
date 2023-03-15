@@ -21,11 +21,15 @@ Route::group(['prefix' => 'users'], function () {
     Route::post('save','App\Http\Controllers\UserController@saveUser');
     Route::get('validateUser','App\Http\Controllers\UserController@validateUser');
     Route::get('getUserById','App\Http\Controllers\UserController@getUserById');
+    Route::get('delete','App\Http\Controllers\UserController@deleteUser');
 });
 
 Route::group(['prefix' => 'categories'], function () {
     Route::get('/','App\Http\Controllers\CategoryController@loadView');
     Route::get('all','App\Http\Controllers\CategoryController@getAllCategories');
+    Route::post('save','App\Http\Controllers\CategoryController@saveCategory');    
+    Route::get('getCategoryById','App\Http\Controllers\CategoryController@getCategoryById');
+    Route::get('delete','App\Http\Controllers\CategoryController@deleteCategory');
 });
 
 Route::group(['prefix' => 'config'], function () {

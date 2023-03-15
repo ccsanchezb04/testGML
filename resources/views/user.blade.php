@@ -138,11 +138,17 @@
                 allowClear: true,
                 theme: "bootstrap"
             });
+
+            $('#usersForm select').val('').trigger('change');
         });
 
         $('#btnAdd').click(function(e) {
             $('#modalUser #modalUserLabel').text('Agregar Usuario');
+            cleanForm();
             $('#action').val('add');
+            $("#btnSave").show();
+            $("#usersForm input").prop('readonly', false);
+            $("#usersForm select").prop('disabled', false);
         });
 
         $('#btnSave').click(function(e) {
@@ -260,6 +266,25 @@
             let action = $(element).data('action');
             let idUser = $(element).data('id');
 
+            cleanForm();
+            $('#modalUser').modal('show');
+
+            if (action == "edit") {
+                $('#modalUser #modalUserLabel').text('Editar Usuario');
+                $('#action').val('edit');
+                $("#btnSave").show();
+                $("#usersForm input").prop('readonly', false);
+                $("#usersForm select").prop('disabled', false);
+            }
+
+            if (action == "view") {
+                $('#modalUser #modalUserLabel').text('Ver Usuario');
+                $('#action').val('view');
+                $("#btnSave").hide();
+                $("#usersForm input").prop('readonly', true);
+                $("#usersForm select").prop('disabled', true);
+            }
+
             let infoUser = '';
 
             axios.get('/users/getUserById', {
@@ -271,10 +296,12 @@
                     if (response.data.status) {
                         infoUser = response.data.data;
 
-                        $.each(infoUser, (indexInArray, valueOfElement) => { 
+                        $.each(infoUser, (indexInArray, valueOfElement) => {
                             console.log(valueOfElement);
-                            $("[name='user["+indexInArray+"]']").val(valueOfElement);
+                            $("[name='user[" + indexInArray + "]']").val(valueOfElement);
                         });
+
+                        $('#usersForm select').trigger('change');
 
                     } else {
                         swal({
@@ -291,15 +318,65 @@
                         icon: "error",
                     });
                 });
+        }
 
-            // $('#usersForm').val();
+        function deleteUser(element) {
+            let idUser = $(element).data('id');
 
-            if (action == "edit") {
-                $('#modalUser #modalUserLabel').text('Editar Usuario');
-                // $('#action').val('edit');
-            }
+            swal("¿Desea eliminar este registro?", {
+                    buttons: {
+                        cancel: {
+                            text: "Cancelar",
+                            value: false,
+                            visible: true,
+                            className: "",
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: "Borrar",
+                            value: true,
+                            visible: true,
+                            className: "",
+                            closeModal: true
+                        }
+                    },
+                })
+                .then((value) => {
+                    if (value) {
+                        axios.get('/users/delete', {
+                                params: {
+                                    "idUser": idUser
+                                }
+                            })
+                            .then((response) => {
+                                if (response.data.status) {
+                                    swal({
+                                        title: "Éxito!",
+                                        text: response.data.msm,
+                                        icon: "success",
+                                    });
 
-            $('#modalUser').modal('show');
+                                    $('#usersTable').DataTable().destroy();
+                                    initDatatable();
+                                } else {
+                                    swal({
+                                        title: "Error!",
+                                        text: "No se puede eliminar este registro",
+                                        icon: "error",
+                                    });
+                                }
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                                swal({
+                                    title: "Error!",
+                                    text: "No se puede eliminar este registro",
+                                    icon: "error",
+                                });
+                            });
+                    }
+                });
+
         }
 
         function validateUser(field, value) {
@@ -375,12 +452,12 @@
                                 '" data-action="edit" onclick="actionUser(this)"><i class="fa-solid fa-pen-to-square"></i> Editar</button>';
                             let btnView =
                                 '<button type="button" class="btn btn-sm btn-success btnView" id="btnView-' +
-                                row.id + ' data-id="' + row.id +
+                                row.id + '" data-id="' + row.id +
                                 '" data-action="view" onclick="actionUser(this)"><i class="fa-solid fa-eye"></i> Ver</button>';
                             let btnDelete =
                                 '<button type="button" class="btn btn-sm btn-danger btnDelete" id="btnDelete-' +
-                                row.id + ' data-id="' + row.id +
-                                '" data-action="delete" onclick="actionUser(this)"><i class="fa-solid fa-trash"></i> Borrar</button>';
+                                row.id + '" data-id="' + row.id +
+                                '" onclick="deleteUser(this)"><i class="fa-solid fa-trash"></i> Borrar</button>';
                             return btnUpdate + ' ' + btnView + ' ' + btnDelete;
                         }
                     },
@@ -390,7 +467,7 @@
 
         function cleanForm() {
             $("#usersForm input").val('');
-            $("#usersForm select").val('').change();
+            $("#usersForm select").val('').trigger('change');
         }
     </script>
 @endsection

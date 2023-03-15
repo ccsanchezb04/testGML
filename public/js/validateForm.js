@@ -21,7 +21,7 @@ function formValidate(selector) {
 
             if (elementValue.length > parseInt(valMaxlength)) {
                 flag = false;
-                msm.miminlength = "Caracteres máximo: " + valMaxlength;
+                msm.miminlength = "Caracteres máximos: " + valMaxlength;
             }
         }
 

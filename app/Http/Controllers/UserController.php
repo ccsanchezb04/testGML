@@ -53,6 +53,8 @@ class UserController extends Controller
 
             if (empty($request->user['id'])) {
                 User::create($dataSaved);
+
+
             } else {
                 User::find($request->user['id'])->update($dataSaved);
             }
@@ -93,8 +95,53 @@ class UserController extends Controller
             $response = ["status" => true, "data" => $user];
         } catch (\Exception $e) {
             $response = ["status" => false, "msm" => $e->getMessage()];
+            dd($e);
         }
 
         return response()->json($response);
+    }
+
+    public function getUsersByCountry()
+    {
+        try {
+            $usersByCountries = User::select(
+                'country',
+                DB::raw('count(1) as cantidad')
+            )
+            ->groupBy('country')
+            ->get();
+
+            $response = ["status" => true, "data" => $usersByCountries];
+        } catch (\Exception $e) {
+            $response = ["status" => false, "msm" => $e->getMessage()];
+            dd($e);
+        }
+
+        return $response;
+    }
+
+    public function deleteUser(Request $request)
+    {
+        try {
+            $user=User::find($request->idUser);
+            $user->delete();
+
+            $response = ["status" => true, "msm" => "Registro borrado con éxito"];
+        } catch (\Exception $e) {
+            $response = ["status" => false, "msm" => $e->getMessage()];
+            dd($e);
+        }
+
+        return response()->json($response);
+    }
+
+    public function sendUserNotification($dataUser)
+    {
+        # code...
+    }
+
+    public function sendAdminStatistics()
+    {
+        # code...
     }
 }
